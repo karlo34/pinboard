@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Corkboard Planner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="global.css">
+    <style>
+        /* ── Join modal ── */
+        #joinModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #joinModal.show {
+            display: flex;
+        }
+
+        #joinModalBox {
+            background: rgba(20, 20, 20, 0.97);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            padding: 28px 24px;
+            width: 320px;
+            max-width: 90vw;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            animation: modalIn 0.25s ease;
+        }
+
+        #joinModalBox h2 {
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        #joinModalBox p {
+            color: rgba(255, 255, 255, 0.45);
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+        }
+
+        #joinCodeInput {
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+            font-size: 28px;
+            letter-spacing: 8px;
+            font-weight: 800;
+            font-family: Nunito, sans-serif;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            outline: none;
+            color: #fff;
+        }
+
+        #joinCodeInput:focus {
+            border-color: #c0392b;
+        }
+
+        #joinModalBox .modal-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        #joinModalBox .modal-btns button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: Nunito, sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        #joinDoBtn {
+            background: #c0392b;
+            color: #fff;
+        }
+
+        #joinCancelBtn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        /* ── Share modal ── */
+        #shareOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #shareOverlay.show {
+            display: flex;
+        }
+
+        #shareModal {
+            background: rgba(20, 20, 20, 0.97);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            padding: 28px 24px;
+            width: 340px;
+            max-width: 90vw;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            animation: modalIn 0.25s ease;
+        }
+
+        #shareModal h2 {
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+
+        #shareCodeDisplay {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: 10px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.07);
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 12px;
+            color: #c0392b;
+            font-family: Nunito, sans-serif;
+        }
+
+        #shareLinkInput {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 6px;
+            font-size: 12px;
+            margin-bottom: 12px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        #shareModal .share-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        #shareModal .share-btns button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: Nunito, sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        #shareCopyBtn {
+            background: #2980b9;
+            color: #fff;
+        }
+
+        #shareCloseBtn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        #qrSection {
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        #qrcode {
+            display: inline-block;
+        }
+
+        #qrSection small {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 11px;
+        }
+
+        /* ── Bottom action bar — always in DOM, CSS positions it ── */
+        #bottomBar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            z-index: 500;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 0 8px;
+            gap: 4px;
+        }
+
+        /* Force toolbar to never wrap — always one line */
+        #toolbar {
+            flex-wrap: nowrap !important;
+            overflow: hidden;
+        }
+
+        /* ── Responsive layout ── */
+
+        /* Desktop: hide bottom bar, show toolbar extras */
+        @media (min-width: 769px) {
+            #bottomBar {
+                bottom: -64px;
+                pointer-events: none;
+            }
+
+            #board {
+                bottom: 0 !important;
+            }
+
+            #toolbarExtras {
+                display: contents;
+            }
+        }
+
+        /* Mobile: show bottom bar, hide toolbar extras, shrink board */
+        @media (max-width: 768px) {
+            #board {
+                bottom: 64px;
+            }
+
+            #toolbarExtras {
+                display: none !important;
+            }
+        }
+
+        #bottomBar button {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-family: Nunito, sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 6px 2px;
+            border-radius: 8px;
+            min-width: 0;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        #bottomBar button:active {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+        }
+
+        #bottomBar button .bi {
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        #bbAddCard .bi {
+            color: #e74c3c;
+        }
+
+        /* color swatch group in bottom bar */
+        #bbColors {
+            flex: 1.3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        #bbColors .dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        #bbColors .color-swatch {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            transition: transform 0.15s, border-color 0.15s;
+        }
+
+        #bbColors .color-swatch.active {
+            border-color: #fff;
+            transform: scale(1.2);
+        }
+
+        #bbColors span {
+            font-size: 10px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.4);
+            font-family: Nunito, sans-serif;
+        }
+
+        @keyframes modalIn {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- TOOLBAR TOP — hamburger + title always visible -->
+    <div id="toolbar">
+        <button id="sidebarToggle" title="Toggle projects">☰</button>
+        <span id="appTitle">📌 Corkboard</span>
+        <span id="currentProjectName">—</span>
+        <!-- desktop-only extras, hidden on mobile via CSS -->
+        <div id="toolbarExtras">
+            <div class="toolbar-sep"></div>
+            <div id="colorPicker">
+                <label>Card:</label>
+                <div class="color-swatch swatch-red active" data-color="red"></div>
+                <div class="color-swatch swatch-blue" data-color="blue"></div>
+                <div class="color-swatch swatch-green" data-color="green"></div>
+            </div>
+            <div class="toolbar-sep"></div>
+            <button class="tb-btn primary" id="newCardBtn">+ New Card</button>
+            <button class="tb-btn" id="newProjectToolbarBtn">＋ Project</button>
+            <span id="cardCount"></span>
+            <button class="tb-btn" id="shareBtn">🔗 Share</button>
+            <button class="tb-btn" id="joinBtn">👥 Join</button>
+        </div>
+    </div>
+
+    <!-- JOIN MODAL -->
+    <div id="joinModal">
+        <div id="joinModalBox">
+            <h2>👥 Join a board</h2>
+            <p>Enter the 6-character share code</p>
+            <input id="joinCodeInput" type="text" maxlength="6" placeholder="ABC123" autocomplete="off"
+                inputmode="text" />
+            <div class="modal-btns">
+                <button id="joinCancelBtn">Cancel</button>
+                <button id="joinDoBtn">Join Board</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SHARE MODAL -->
+    <div id="shareOverlay">
+        <div id="shareModal">
+            <h2>🔗 Share this board</h2>
+            <div id="shareCodeDisplay"></div>
+            <input id="shareLinkInput" type="text" readonly />
+            <div class="share-btns">
+                <button id="shareCopyBtn">📋 Copy link</button>
+                <button id="shareCloseBtn">Close</button>
+            </div>
+            <div id="qrSection">
+                <small>Scan to join on mobile</small><br>
+                <div id="qrcode"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div id="sidebar">
+        <div id="sidebarHeader">
+            <h2>Projects</h2>
+            <button id="newProjectBtn">+ New</button>
+        </div>
+        <div id="projectList"></div>
+    </div>
+
+    <!-- BOARD -->
+    <div id="board">
+        <div id="emptyState">
+            <div class="es-icon">📋</div>
+            <p>Tap "+ Card" to get started</p>
+        </div>
+    </div>
+
+    <!-- NEW PROJECT MODAL -->
+    <div id="modalOverlay">
+        <div id="modal">
+            <h2>📁 New Project</h2>
+            <input type="text" id="modalInput" placeholder="Project name..." maxlength="40" />
+            <div class="modal-btns">
+                <button id="modalCancel">Cancel</button>
+                <button id="modalConfirm">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTTOM ACTION BAR — CSS moves it off-screen on desktop -->
+    <div id="bottomBar">
+        <div id="bbColors">
+            <div class="dots">
+                <div class="color-swatch swatch-red active" data-color="red"></div>
+                <div class="color-swatch swatch-blue" data-color="blue"></div>
+                <div class="color-swatch swatch-green" data-color="green"></div>
+            </div>
+            <span>Color</span>
+        </div>
+        <button id="bbAddCard">
+            <span class="bi">＋</span>
+            <span>Card</span>
+        </button>
+        <button id="bbNewProj">
+            <span class="bi">📁</span>
+            <span>Project</span>
+        </button>
+        <button id="bbShare">
+            <span class="bi">🔗</span>
+            <span>Share</span>
+        </button>
+        <button id="bbJoin">
+            <span class="bi">👥</span>
+            <span>Join</span>
+        </button>
+    </div>
+
+    <div id="toast"></div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import {
+            getFirestore, doc, collection, setDoc, updateDoc,
+            deleteDoc, onSnapshot, getDoc, getDocs
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCgMbsaQcTtJPVsKjiFzly3mVc11dwuBdA",
+            authDomain: "planboard-1.firebaseapp.com",
+            projectId: "planboard-1",
+            storageBucket: "planboard-1.firebasestorage.app",
+            messagingSenderId: "407699826263",
+            appId: "1:407699826263:web:a9bb2086cd7302879aa512"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const CARD_IMAGES = { red: 'redCard.jpg', blue: 'blueCard.jpg', green: 'greenCard.jpg' };
+        const TILTS = [-4, -2, -1, 0, 1, 2, 4];
+        const STORAGE_KEY = 'corkboard_v1';
+
+        let appState = { activeProjectId: null, isGuest: false, projects: [] };
+        let unsubscribeCards = null;
+        let selectedColor = 'red';
+
+
+        // ── Utils ────────────────────────────────────────────────────────
+        function escHtml(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function showToast(msg) {
+            $('#toast').text(msg).addClass('show');
+            setTimeout(() => $('#toast').removeClass('show'), 2500);
+        }
+
+        function updateCount() {
+            const p = activeProject();
+            const n = p ? p.cards.length : 0;
+            $('#cardCount').text(n + (n === 1 ? ' card' : ' cards'));
+        }
+
+        function activeProject() {
+            return appState.projects.find(p => p.id === appState.activeProjectId);
+        }
+
+        // ── Local storage ────────────────────────────────────────────────
+        function loadLocal() {
+            try { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : null; }
+            catch { return null; }
+        }
+
+        function saveLocal() {
+            if (!appState.isGuest) localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+        }
+
+        // ── Firestore refs ───────────────────────────────────────────────
+        const projRef = code => doc(db, 'projects', code);
+        const cardsRef = code => collection(db, 'projects', code, 'cards');
+        const cardRef = (code, id) => doc(db, 'projects', code, 'cards', String(id));
+
+        async function syncProj(proj) {
+            await setDoc(projRef(proj.shareCode), { name: proj.name, shareCode: proj.shareCode, ownerId: proj.id });
+        }
+
+        // ── Factories ────────────────────────────────────────────────────
+        function makeProject(name) {
+            return { id: Date.now() + Math.random(), name, shareCode: genCode(), cards: [] };
+        }
+
+        function makeCard(color) {
+            const proj = activeProject();
+            const num = (proj ? proj.cards.length : 0) + 1;
+            const boardH = window.innerHeight - (document.body.classList.contains('mobile-mode') ? 68 : 0);
+            return {
+                id: Date.now() + Math.random(),
+                title: 'Card ' + num, content: '', color,
+                x: Math.random() * Math.max(60, window.innerWidth - 280) + 20,
+                y: Math.random() * Math.max(60, boardH - 320) + 80,
+                tilt: TILTS[Math.floor(Math.random() * TILTS.length)]
+            };
+        }
+
+        function genCode() {
+            const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let s = '';
+            for (let i = 0; i < 6; i++) s += c[Math.floor(Math.random() * c.length)];
+            return s;
+        }
+
+        // ── Firestore listener ───────────────────────────────────────────
+        function startListening() {
+            const proj = activeProject();
+            if (!proj) return;
+            if (unsubscribeCards) { unsubscribeCards(); unsubscribeCards = null; }
+
+            proj.cards = [];
+            $('#board').find('.paper').remove();
+            $('#emptyState').show();
+
+            let initialLoad = true;
+            const pendingInitial = [];
+
+            unsubscribeCards = onSnapshot(cardsRef(proj.shareCode), snapshot => {
+                snapshot.docChanges().forEach(change => {
+                    const data = change.doc.data();
+                    const cardId = data.id;
+
+                    if (change.type === 'added') {
+                        if (!proj.cards.find(c => c.id == cardId)) {
+                            proj.cards.push(data);
+                            if (initialLoad) {
+                                pendingInitial.push(data);
+                            } else {
+                                renderCard(data, true);
+                                $('#emptyState').hide();
+                                updateCount(); renderSidebar();
+                            }
+                        }
+                    }
+                    if (change.type === 'modified') {
+                        const local = proj.cards.find(c => c.id == cardId);
+                        if (local) {
+                            Object.assign(local, data);
+                            const $c = $(`.paper[data-id="${cardId}"]`);
+                            if ($c.length) {
+                                $c.css({ left: data.x + 'px', top: data.y + 'px', transform: `rotate(${data.tilt}deg)` });
+                                const $ti = $c.find('.paper-title');
+                                const $co = $c.find('.paper-content');
+                                if (!$ti.is(':focus')) $ti.val(data.title);
+                                if (!$co.is(':focus')) $co.val(data.content);
+                            }
+                        }
+                    }
+                    if (change.type === 'removed') {
+                        proj.cards = proj.cards.filter(c => c.id != cardId);
+                        const $c = $(`.paper[data-id="${cardId}"]`);
+                        $c.css({ opacity: 0, transition: 'opacity 0.2s' });
+                        setTimeout(() => {
+                            $c.remove();
+                            if (proj.cards.length === 0) $('#emptyState').show();
+                            updateCount(); renderSidebar();
+                        }, 200);
+                    }
+                });
+
+                if (initialLoad) {
+                    initialLoad = false;
+                    pendingInitial.forEach(d => renderCard(d, false));
+                    if (pendingInitial.length > 0) $('#emptyState').hide();
+                    updateCount(); renderSidebar();
+                }
+            });
+        }
+
+        // ── Join ─────────────────────────────────────────────────────────
+        async function joinByCode(code) {
+            showToast('Joining board…');
+            try {
+                const snap = await getDoc(projRef(code));
+                if (!snap.exists()) { showToast('Board not found! Check the code.'); return; }
+                const pd = snap.data();
+                const gp = { id: pd.ownerId, name: pd.name, shareCode: code, cards: [] };
+                appState.isGuest = true;
+                appState.activeProjectId = gp.id;
+                appState.projects = [gp];
+                $('#currentProjectName').text(pd.name);
+                renderSidebar(); startListening();
+                $('#newProjectBtn, #newProjectToolbarBtn, #bbNewProj').hide();
+                window.history.replaceState({}, '', window.location.pathname);
+                showToast(`Joined "${pd.name}"!`);
+            } catch (e) {
+                console.error(e);
+                showToast('Failed to join. Try again.');
+            }
+        }
+
+        // ── Share ─────────────────────────────────────────────────────────
+        async function openShare() {
+            const proj = activeProject();
+            if (!proj) return;
+            await syncProj(proj);
+            const url = `${location.origin}${location.pathname}?join=${proj.shareCode}`;
+            $('#shareCodeDisplay').text(proj.shareCode);
+            $('#shareLinkInput').val(url);
+            $('#qrcode').empty();
+            if (typeof QRCode !== 'undefined') new QRCode(document.getElementById('qrcode'), { text: url, width: 140, height: 140 });
+            $('#shareOverlay').addClass('show');
+            $('#sidebar').removeClass('open');
+        }
+
+        // ── Join modal ────────────────────────────────────────────────────
+        function openJoin(prefill) {
+            $('#joinCodeInput').val(prefill || '');
+            $('#joinModal').addClass('show');
+            $('#sidebar').removeClass('open');
+            setTimeout(() => $('#joinCodeInput').focus(), 80);
+        }
+
+        function closeJoin() { $('#joinModal').removeClass('show'); }
+
+        function doJoin() {
+            const code = $('#joinCodeInput').val().trim().toUpperCase();
+            if (code.length < 2) { showToast('Enter a valid code'); return; }
+            closeJoin();
+            joinByCode(code);
+        }
+
+        // ── Add card ─────────────────────────────────────────────────────
+        async function addCard() {
+            const proj = activeProject();
+            if (!proj) { showToast('Create a project first!'); return; }
+            const data = makeCard(selectedColor);
+            await setDoc(cardRef(proj.shareCode, data.id), data);
+            showToast('Card added!');
+        }
+
+        // ── Render sidebar ───────────────────────────────────────────────
+        function renderSidebar() {
+            const $list = $('#projectList').empty();
+            appState.projects.forEach(proj => {
+                const isActive = proj.id === appState.activeProjectId;
+                const $item = $(`
+                    <div class="project-item ${isActive ? 'active' : ''}" data-id="${proj.id}">
+                        <span class="proj-icon">📋</span>
+                        <span class="proj-name">${escHtml(proj.name)}</span>
+                        <span class="proj-count">${proj.cards.length}</span>
+                        ${!appState.isGuest ? `<button class="proj-delete" data-id="${proj.id}">✕</button>` : ''}
+                    </div>
+                `);
+                $item.on('click', function (e) {
+                    if ($(e.target).hasClass('proj-delete')) return;
+                    switchProject(proj.id);
+                    $('#sidebar').removeClass('open');
+                });
+                $item.find('.proj-delete').on('click', function (e) {
+                    e.stopPropagation(); deleteProject(proj.id);
+                });
+                $list.append($item);
+            });
+        }
+
+        // ── Touch drag ───────────────────────────────────────────────────
+        function enableTouchDrag($card, cardData) {
+            const proj = activeProject();
+            let startX, startY, origLeft, origTop, dragging = false;
+
+            $card[0].addEventListener('touchstart', function (e) {
+                if ($(e.target).is('input, textarea, button')) return;
+                const t = e.touches[0];
+                startX = t.clientX; startY = t.clientY;
+                origLeft = parseInt($card.css('left')) || 0;
+                origTop = parseInt($card.css('top')) || 0;
+                dragging = true;
+                $card.css('z-index', 999);
+                e.stopPropagation();
+            }, { passive: false });
+
+            $card[0].addEventListener('touchmove', function (e) {
+                if (!dragging) return;
+                const t = e.touches[0];
+                const board = document.getElementById('board');
+                const br = board.getBoundingClientRect();
+                const newLeft = Math.max(0, Math.min(origLeft + t.clientX - startX, br.width - $card.outerWidth()));
+                const newTop = Math.max(0, Math.min(origTop + t.clientY - startY, br.height - $card.outerHeight()));
+                $card.css({ left: newLeft + 'px', top: newTop + 'px' });
+                e.preventDefault();
+            }, { passive: false });
+
+            $card[0].addEventListener('touchend', function (e) {
+                if (!dragging) return;
+                dragging = false;
+                cardData.x = parseInt($card.css('left'));
+                cardData.y = parseInt($card.css('top'));
+                saveLocal();
+                updateDoc(cardRef(proj.shareCode, cardData.id), { x: cardData.x, y: cardData.y });
+                $card.css('z-index', '');
+            }, { passive: true });
+        }
+
+        // ── Render card ──────────────────────────────────────────────────
+        function renderCard(cardData, isNew) {
+            const imgSrc = CARD_IMAGES[cardData.color] || CARD_IMAGES.red;
+            const $card = $(`
+                <div class="paper" data-id="${cardData.id}"
+                     style="left:${cardData.x}px;top:${cardData.y}px;transform:rotate(${cardData.tilt}deg);">
+                    <div class="tape"></div>
+                    <div class="paper-inner" style="background-image:url('./${imgSrc}');">
+                        <button class="delete-btn" title="Remove card">✕</button>
+                        <input class="paper-title" type="text" value="${escHtml(cardData.title)}" maxlength="30" />
+                        <textarea class="paper-content" maxlength="200" placeholder="Write your note...">${escHtml(cardData.content)}</textarea>
+                        <span class="paper-hint">dbl-click to edit</span>
+                    </div>
+                </div>
+            `);
+            const proj = activeProject();
+
+            let tt;
+            $card.find('.paper-title').on('input', function () {
+                cardData.title = $(this).val(); saveLocal(); updateCount();
+                clearTimeout(tt);
+                tt = setTimeout(() => updateDoc(cardRef(proj.shareCode, cardData.id), { title: cardData.title }), 400);
+            }).on('dblclick', function () { $(this).select(); });
+
+            let ct;
+            $card.find('.paper-content').on('input', function () {
+                cardData.content = $(this).val(); saveLocal();
+                clearTimeout(ct);
+                ct = setTimeout(() => updateDoc(cardRef(proj.shareCode, cardData.id), { content: cardData.content }), 400);
+            }).on('dblclick', function () { $(this).focus(); });
+
+            $card.find('.paper-title, .paper-content').on('mousedown', e => e.stopPropagation());
+
+            $card.find('.delete-btn').on('click touchend', function (e) {
+                e.preventDefault(); e.stopPropagation();
+                deleteDoc(cardRef(proj.shareCode, cardData.id))
+                    .catch(() => showToast('Could not delete card.'));
+            });
+
+            $('#board').append($card);
+
+            $card.draggable({
+                containment: '#board', stack: '.paper', cursor: 'grabbing',
+                cancel: '.paper-title, .paper-content, .delete-btn',
+                stop: function (e, ui) {
+                    cardData.x = ui.position.left; cardData.y = ui.position.top;
+                    saveLocal();
+                    updateDoc(cardRef(proj.shareCode, cardData.id), { x: cardData.x, y: cardData.y });
+                }
+            });
+            enableTouchDrag($card, cardData);
+
+            if (isNew) {
+                $card.css({ opacity: 0 });
+                setTimeout(() => $card.css({ opacity: 1, transition: 'opacity 0.25s' }), 10);
+            }
+        }
+
+        // ── Project management ───────────────────────────────────────────
+        function switchProject(id) {
+            appState.activeProjectId = id;
+            const proj = activeProject();
+            $('#currentProjectName').text(proj ? proj.name : '—');
+            saveLocal(); renderSidebar(); startListening();
+        }
+
+        function deleteProject(id) {
+            if (appState.projects.length === 1) { showToast("Can't delete the last project!"); return; }
+            appState.projects = appState.projects.filter(p => p.id !== id);
+            if (appState.activeProjectId === id) appState.activeProjectId = appState.projects[0].id;
+            const proj = activeProject();
+            $('#currentProjectName').text(proj ? proj.name : '—');
+            saveLocal(); renderSidebar(); startListening();
+            showToast('Project deleted');
+        }
+
+        function openModal() {
+            $('#modalInput').val('');
+            $('#modalOverlay').addClass('show');
+            $('#sidebar').removeClass('open');
+            setTimeout(() => $('#modalInput').focus(), 50);
+        }
+
+        function closeModal() { $('#modalOverlay').removeClass('show'); }
+
+        async function confirmNewProject() {
+            const name = $('#modalInput').val().trim();
+            if (!name) { $('#modalInput').focus(); return; }
+            const proj = makeProject(name);
+            appState.projects.push(proj);
+            appState.activeProjectId = proj.id;
+            saveLocal();
+            await syncProj(proj);
+            $('#currentProjectName').text(proj.name);
+            renderSidebar(); startListening();
+            closeModal();
+            showToast('Project "' + name + '" created!');
+        }
+
+        // ── Color swatches (toolbar + mobile bar) ────────────────────────
+        $(document).on('click touchend', '.color-swatch', function (e) {
+            e.preventDefault();
+            const color = $(this).data('color');
+            $('.color-swatch').removeClass('active');
+            $(`.color-swatch[data-color="${color}"]`).addClass('active');
+            selectedColor = color;
+        });
+
+        // ── Sidebar ───────────────────────────────────────────────────────
+        $('#sidebarToggle').on('click', () => $('#sidebar').toggleClass('open'));
+        $('#board').on('click', function (e) {
+            if (!$(e.target).closest('#sidebar, #toolbar, #bottomBar').length) $('#sidebar').removeClass('open');
+        });
+
+        // ── Desktop toolbar ───────────────────────────────────────────────
+        $('#newCardBtn').on('click', addCard);
+        $('#newProjectToolbarBtn, #newProjectBtn').on('click', openModal);
+        $('#shareBtn').on('click', openShare);
+        $('#joinBtn').on('click', () => openJoin());
+
+        // ── Mobile bar ────────────────────────────────────────────────────
+        $('#bbAddCard').on('click', addCard);
+        $('#bbNewProj').on('click', openModal);
+        $('#bbShare').on('click', openShare);
+        $('#bbJoin').on('click', () => openJoin());
+
+        // ── New project modal ─────────────────────────────────────────────
+        $('#modalCancel').on('click', closeModal);
+        $('#modalConfirm').on('click', confirmNewProject);
+        $('#modalInput').on('keydown', e => { if (e.key === 'Enter') confirmNewProject(); if (e.key === 'Escape') closeModal(); });
+        $('#modalOverlay').on('click', function (e) { if ($(e.target).is('#modalOverlay')) closeModal(); });
+
+        // ── Share modal ───────────────────────────────────────────────────
+        $('#shareCloseBtn').on('click', () => $('#shareOverlay').removeClass('show'));
+        $('#shareCopyBtn').on('click', async function () {
+            const url = $('#shareLinkInput').val();
+            try { await navigator.clipboard.writeText(url); }
+            catch { $('#shareLinkInput').select(); document.execCommand('copy'); }
+            showToast('Link copied!');
+        });
+        $('#shareOverlay').on('click', function (e) { if ($(e.target).is('#shareOverlay')) $('#shareOverlay').removeClass('show'); });
+
+        // ── Join modal ────────────────────────────────────────────────────
+        $('#joinCancelBtn').on('click', closeJoin);
+        $('#joinDoBtn').on('click', doJoin);
+        $('#joinCodeInput').on('input', function () {
+            const p = this.selectionStart;
+            this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            this.setSelectionRange(p, p);
+        });
+        $('#joinCodeInput').on('keydown', e => { if (e.key === 'Enter') doJoin(); if (e.key === 'Escape') closeJoin(); });
+        $('#joinModal').on('click', function (e) { if ($(e.target).is('#joinModal')) closeJoin(); });
+
+        // ── Bootstrap ────────────────────────────────────────────────────
+        function initNormal() {
+            const saved = loadLocal();
+            if (saved && saved.projects && saved.projects.length > 0) {
+                appState = saved;
+                appState.projects.forEach(p => p.cards = []);
+            } else {
+                const p = makeProject('My First Board');
+                appState.projects.push(p);
+                appState.activeProjectId = p.id;
+                saveLocal();
+            }
+            const proj = activeProject();
+            $('#currentProjectName').text(proj ? proj.name : '—');
+            renderSidebar();
+            startListening();
+        }
+
+        const urlParams = new URLSearchParams(location.search);
+        const joinCode = urlParams.get('join');
+
+        if (joinCode) {
+            initNormal();
+            openJoin(joinCode.toUpperCase());
+        } else {
+            initNormal();
+        }
+
+    </script>
+</body>
+
+</html>
