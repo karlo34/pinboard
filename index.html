@@ -8,7 +8,297 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="global.css">
     <style>
-        /* ── Join modal ── */
+        /* ── Auth screen ── */
+        #authScreen {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background-image: url('./pinboard.jpg');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #authScreen::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(4px);
+        }
+
+        #authBox {
+            position: relative;
+            z-index: 1;
+            background: rgba(15, 15, 15, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 18px;
+            padding: 36px 32px;
+            width: 360px;
+            max-width: 92vw;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.7);
+            animation: modalIn 0.3s ease;
+        }
+
+        #authBox h1 {
+            color: #f5e6c8;
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-align: center;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        #authBox .auth-sub {
+            color: rgba(255, 255, 255, 0.35);
+            font-size: 0.8rem;
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        #authTabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 24px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
+            padding: 3px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            font-family: Nunito, sans-serif;
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            background: none;
+            color: rgba(255, 255, 255, 0.4);
+            transition: all 0.2s;
+        }
+
+        .auth-tab.active {
+            background: #c0392b;
+            color: #fff;
+        }
+
+        .auth-field {
+            margin-bottom: 12px;
+        }
+
+        .auth-field label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .auth-field input {
+            width: 100%;
+            padding: 11px 14px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
+            color: #fff;
+            font-family: Nunito, sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            outline: none;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+
+        .auth-field input:focus {
+            border-color: #c0392b;
+        }
+
+        #authSubmit {
+            width: 100%;
+            padding: 13px;
+            margin-top: 8px;
+            background: #c0392b;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-family: Nunito, sans-serif;
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: background 0.15s;
+            letter-spacing: 0.5px;
+        }
+
+        #authSubmit:hover {
+            background: #e74c3c;
+        }
+
+        #authError {
+            color: #e74c3c;
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-align: center;
+            margin-top: 10px;
+            min-height: 20px;
+        }
+
+        /* username display in toolbar */
+        #userDisplay {
+            margin-left: auto;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.4);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #logoutBtn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: rgba(255, 255, 255, 0.5);
+            border-radius: 6px;
+            padding: 3px 10px;
+            font-family: Nunito, sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        #logoutBtn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+
+        /* ── Mobile menu button (⋮) — always shown ── */
+        #mobileMenuBtn {
+            display: flex;
+            margin-left: auto;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            border-radius: 8px;
+            width: 36px;
+            height: 36px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.15s;
+        }
+
+        #mobileMenuBtn:active {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        /* ── Mobile dropdown menu ── */
+        #mobileMenu {
+            display: none;
+            position: fixed;
+            top: 60px;
+            right: 0;
+            width: 240px;
+            background: rgba(15, 15, 15, 0.97);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-top: none;
+            border-radius: 0 0 0 14px;
+            z-index: 600;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: -4px 8px 32px rgba(0, 0, 0, 0.5);
+            animation: slideDown 0.18s ease;
+        }
+
+        #mobileMenu.open {
+            display: flex;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* User info row at top of menu */
+        #mobileMenuUser {
+            padding: 14px 16px 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Color row inside menu */
+        #mobileMenuColors {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        #mobileMenuColors span {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.35);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .mm-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 13px 16px;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-family: Nunito, sans-serif;
+            font-size: 0.92rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: left;
+            width: 100%;
+            transition: background 0.12s;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .mm-btn:last-child {
+            border-bottom: none;
+        }
+
+        .mm-btn:active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .mm-btn.danger {
+            color: #e74c3c;
+        }
+
+        .mm-btn .mm-icon {
+            font-size: 1.1rem;
+            width: 22px;
+            text-align: center;
+        }
+
+
         #joinModal {
             display: none;
             position: fixed;
@@ -194,7 +484,7 @@
             font-size: 11px;
         }
 
-        /* ── Bottom action bar — always in DOM, CSS positions it ── */
+        /* ── Bottom action bar ── */
         #bottomBar {
             position: fixed;
             bottom: 0;
@@ -213,13 +503,11 @@
             gap: 4px;
         }
 
-        /* Force toolbar to never wrap — always one line */
+        /* Force toolbar to never wrap */
         #toolbar {
             flex-wrap: nowrap !important;
             overflow: hidden;
         }
-
-        /* ── Responsive layout ── */
 
         /* Desktop: hide bottom bar, show toolbar extras */
         @media (min-width: 769px) {
@@ -231,19 +519,19 @@
             #board {
                 bottom: 0 !important;
             }
-
-            #toolbarExtras {
-                display: contents;
-            }
         }
 
-        /* Mobile: show bottom bar, hide toolbar extras, shrink board */
+        /* Mobile: show bottom bar, shrink board, hide toolbar buttons */
         @media (max-width: 768px) {
             #board {
                 bottom: 64px;
             }
 
-            #toolbarExtras {
+            #newCardBtn {
+                display: none !important;
+            }
+
+            #newProjectToolbarBtn {
                 display: none !important;
             }
         }
@@ -321,6 +609,27 @@
             font-family: Nunito, sans-serif;
         }
 
+        /* ── Board & canvas ── */
+        #board {
+            overflow: hidden;
+            cursor: grab;
+        }
+
+        #board.panning {
+            cursor: grabbing;
+        }
+
+        /* The infinite canvas that cards live on */
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform-origin: 0 0;
+            will-change: transform;
+        }
+
         @keyframes modalIn {
             from {
                 transform: scale(0.9);
@@ -337,27 +646,62 @@
 
 <body>
 
-    <!-- TOOLBAR TOP — hamburger + title always visible -->
+    <!-- AUTH SCREEN -->
+    <div id="authScreen">
+        <div id="authBox">
+            <h1>📌 Corkboard</h1>
+            <p class="auth-sub">Your personal planning board</p>
+            <div id="authTabs">
+                <button class="auth-tab active" data-tab="login">Sign In</button>
+                <button class="auth-tab" data-tab="register">Register</button>
+            </div>
+            <div class="auth-field">
+                <label>Email</label>
+                <input type="email" id="authUsername" placeholder="you@example.com" autocomplete="email" />
+            </div>
+            <div class="auth-field" id="authDisplayNameField" style="display:none">
+                <label>Display Name</label>
+                <input type="text" id="authDisplayName" placeholder="How should we call you?" />
+            </div>
+            <div class="auth-field">
+                <label>Password</label>
+                <input type="password" id="authPassword" placeholder="••••••••" autocomplete="current-password" />
+            </div>
+            <div id="forgotWrap" style="text-align:right; margin-bottom:4px;">
+                <a id="forgotLink" href="#"
+                    style="font-size:0.75rem; color:rgba(255,255,255,0.35); text-decoration:none;">Forgot password?</a>
+            </div>
+            <button id="authSubmit">Sign In</button>
+            <div id="authError"></div>
+        </div>
+    </div>
+
+    <!-- TOOLBAR TOP -->
     <div id="toolbar">
         <button id="sidebarToggle" title="Toggle projects">☰</button>
         <span id="appTitle">📌 Corkboard</span>
         <span id="currentProjectName">—</span>
-        <!-- desktop-only extras, hidden on mobile via CSS -->
-        <div id="toolbarExtras">
-            <div class="toolbar-sep"></div>
-            <div id="colorPicker">
-                <label>Card:</label>
-                <div class="color-swatch swatch-red active" data-color="red"></div>
-                <div class="color-swatch swatch-blue" data-color="blue"></div>
-                <div class="color-swatch swatch-green" data-color="green"></div>
-            </div>
-            <div class="toolbar-sep"></div>
-            <button class="tb-btn primary" id="newCardBtn">+ New Card</button>
-            <button class="tb-btn" id="newProjectToolbarBtn">＋ Project</button>
-            <span id="cardCount"></span>
-            <button class="tb-btn" id="shareBtn">🔗 Share</button>
-            <button class="tb-btn" id="joinBtn">👥 Join</button>
+        <div class="toolbar-sep"></div>
+        <button class="tb-btn primary" id="newCardBtn">+ New Card</button>
+        <button class="tb-btn" id="newProjectToolbarBtn">＋ Project</button>
+        <button id="mobileMenuBtn" title="Menu">⋮</button>
+    </div>
+
+    <!-- MOBILE DROPDOWN MENU -->
+    <div id="mobileMenu">
+        <div id="mobileMenuUser">👤 <span id="mobileUserLabel"></span></div>
+        <div id="mobileMenuColors">
+            <span>Color:</span>
+            <div class="color-swatch swatch-red active" data-color="red"></div>
+            <div class="color-swatch swatch-blue" data-color="blue"></div>
+            <div class="color-swatch swatch-green" data-color="green"></div>
         </div>
+        <button class="mm-btn" id="mmAddCard"><span class="mm-icon">＋</span> New Card</button>
+        <button class="mm-btn" id="mmNewProject"><span class="mm-icon">📁</span> New Project</button>
+        <button class="mm-btn" id="mmShare"><span class="mm-icon">🔗</span> Share Board</button>
+        <button class="mm-btn" id="mmJoin"><span class="mm-icon">👥</span> Join Board</button>
+        <button class="mm-btn" id="mmHome"><span class="mm-icon">⌂</span> Reset View</button>
+        <button class="mm-btn danger" id="mmLogout"><span class="mm-icon">↩</span> Sign Out</button>
     </div>
 
     <!-- JOIN MODAL -->
@@ -402,9 +746,11 @@
 
     <!-- BOARD -->
     <div id="board">
-        <div id="emptyState">
-            <div class="es-icon">📋</div>
-            <p>Tap "+ Card" to get started</p>
+        <div id="canvas">
+            <div id="emptyState">
+                <div class="es-icon">📋</div>
+                <p>Tap "+ Card" to get started</p>
+            </div>
         </div>
     </div>
 
@@ -420,7 +766,7 @@
         </div>
     </div>
 
-    <!-- BOTTOM ACTION BAR — CSS moves it off-screen on desktop -->
+    <!-- BOTTOM ACTION BAR -->
     <div id="bottomBar">
         <div id="bbColors">
             <div class="dots">
@@ -446,6 +792,10 @@
             <span class="bi">👥</span>
             <span>Join</span>
         </button>
+        <button id="bbHome">
+            <span class="bi">⌂</span>
+            <span>Home</span>
+        </button>
     </div>
 
     <div id="toast"></div>
@@ -460,6 +810,10 @@
             getFirestore, doc, collection, setDoc, updateDoc,
             deleteDoc, onSnapshot, getDoc, getDocs
         } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import {
+            getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+            signOut, onAuthStateChanged, updateProfile, sendPasswordResetEmail
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCgMbsaQcTtJPVsKjiFzly3mVc11dwuBdA",
@@ -472,6 +826,7 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
 
         const CARD_IMAGES = { red: 'redCard.jpg', blue: 'blueCard.jpg', green: 'greenCard.jpg' };
         const TILTS = [-4, -2, -1, 0, 1, 2, 4];
@@ -480,7 +835,6 @@
         let appState = { activeProjectId: null, isGuest: false, projects: [] };
         let unsubscribeCards = null;
         let selectedColor = 'red';
-
 
         // ── Utils ────────────────────────────────────────────────────────
         function escHtml(s) {
@@ -513,28 +867,40 @@
         }
 
         // ── Firestore refs ───────────────────────────────────────────────
-        const projRef = code => doc(db, 'projects', code);
+        // Projects are stored under users/{uid}/projects/{shareCode}
+        const userProjsRef = (uid) => collection(db, 'users', uid, 'projects');
+        const userProjRef = (uid, code) => doc(db, 'users', uid, 'projects', code);
+        const projRef = code => doc(db, 'projects', code);          // shared lookup
         const cardsRef = code => collection(db, 'projects', code, 'cards');
         const cardRef = (code, id) => doc(db, 'projects', code, 'cards', String(id));
 
         async function syncProj(proj) {
-            await setDoc(projRef(proj.shareCode), { name: proj.name, shareCode: proj.shareCode, ownerId: proj.id });
+            const uid = auth.currentUser?.uid;
+            await setDoc(projRef(proj.shareCode), { name: proj.name, shareCode: proj.shareCode, ownerId: proj.id, uid });
+            if (uid) await setDoc(userProjRef(uid, proj.shareCode), { name: proj.name, shareCode: proj.shareCode, createdAt: Date.now() });
         }
 
         // ── Factories ────────────────────────────────────────────────────
         function makeProject(name) {
-            return { id: Date.now() + Math.random(), name, shareCode: genCode(), cards: [] };
+            const code = genCode();
+            return { id: code, name, shareCode: code, cards: [] };
         }
 
         function makeCard(color) {
             const proj = activeProject();
             const num = (proj ? proj.cards.length : 0) + 1;
-            const boardH = window.innerHeight - (document.body.classList.contains('mobile-mode') ? 68 : 0);
+            const board = document.getElementById('board');
+            const br = board.getBoundingClientRect();
+            // Convert board centre into canvas coordinates (undo pan + zoom)
+            const cx = (br.width / 2 - vp.x) / vp.z;
+            const cy = (br.height / 2 - vp.y) / vp.z;
+            // Scatter slightly so multiple new cards don't perfectly stack
+            const scatter = 80;
             return {
                 id: Date.now() + Math.random(),
                 title: 'Card ' + num, content: '', color,
-                x: Math.random() * Math.max(60, window.innerWidth - 280) + 20,
-                y: Math.random() * Math.max(60, boardH - 320) + 80,
+                x: cx - 115 + (Math.random() * scatter - scatter / 2),
+                y: cy - 115 + (Math.random() * scatter - scatter / 2),
                 tilt: TILTS[Math.floor(Math.random() * TILTS.length)]
             };
         }
@@ -553,7 +919,7 @@
             if (unsubscribeCards) { unsubscribeCards(); unsubscribeCards = null; }
 
             proj.cards = [];
-            $('#board').find('.paper').remove();
+            $('#canvas').find('.paper').remove();
             $('#emptyState').show();
 
             let initialLoad = true;
@@ -698,42 +1064,67 @@
             });
         }
 
-        // ── Touch drag ───────────────────────────────────────────────────
-        function enableTouchDrag($card, cardData) {
+        // ── Drag cards (mouse + touch, zoom-aware) ───────────────────────
+        function enableDrag($card, cardData) {
             const proj = activeProject();
             let startX, startY, origLeft, origTop, dragging = false;
 
-            $card[0].addEventListener('touchstart', function (e) {
-                if ($(e.target).is('input, textarea, button')) return;
-                const t = e.touches[0];
-                startX = t.clientX; startY = t.clientY;
-                origLeft = parseInt($card.css('left')) || 0;
-                origTop = parseInt($card.css('top')) || 0;
+            function onStart(clientX, clientY) {
+                startX = clientX;
+                startY = clientY;
+                origLeft = parseFloat($card.css('left')) || 0;
+                origTop = parseFloat($card.css('top')) || 0;
                 dragging = true;
                 $card.css('z-index', 999);
-                e.stopPropagation();
-            }, { passive: false });
+            }
 
-            $card[0].addEventListener('touchmove', function (e) {
+            function onMove(clientX, clientY) {
                 if (!dragging) return;
-                const t = e.touches[0];
-                const board = document.getElementById('board');
-                const br = board.getBoundingClientRect();
-                const newLeft = Math.max(0, Math.min(origLeft + t.clientX - startX, br.width - $card.outerWidth()));
-                const newTop = Math.max(0, Math.min(origTop + t.clientY - startY, br.height - $card.outerHeight()));
+                // Divide pixel delta by zoom so movement matches cursor speed
+                const newLeft = origLeft + (clientX - startX) / vp.z;
+                const newTop = origTop + (clientY - startY) / vp.z;
                 $card.css({ left: newLeft + 'px', top: newTop + 'px' });
-                e.preventDefault();
-            }, { passive: false });
+            }
 
-            $card[0].addEventListener('touchend', function (e) {
+            function onEnd() {
                 if (!dragging) return;
                 dragging = false;
-                cardData.x = parseInt($card.css('left'));
-                cardData.y = parseInt($card.css('top'));
+                cardData.x = parseFloat($card.css('left'));
+                cardData.y = parseFloat($card.css('top'));
                 saveLocal();
                 updateDoc(cardRef(proj.shareCode, cardData.id), { x: cardData.x, y: cardData.y });
                 $card.css('z-index', '');
+            }
+
+            // Mouse
+            $card[0].addEventListener('mousedown', function (e) {
+                if ($(e.target).is('input, textarea, button')) return;
+                e.preventDefault();
+                e.stopPropagation();
+                onStart(e.clientX, e.clientY);
+
+                function onMouseMove(e) { onMove(e.clientX, e.clientY); }
+                function onMouseUp() { onEnd(); document.removeEventListener('mousemove', onMouseMove); document.removeEventListener('mouseup', onMouseUp); }
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            });
+
+            // Touch
+            $card[0].addEventListener('touchstart', function (e) {
+                if ($(e.target).is('input, textarea, button')) return;
+                e.stopPropagation();
+                const t = e.touches[0];
+                onStart(t.clientX, t.clientY);
             }, { passive: true });
+
+            $card[0].addEventListener('touchmove', function (e) {
+                if (!dragging) return;
+                e.preventDefault();
+                const t = e.touches[0];
+                onMove(t.clientX, t.clientY);
+            }, { passive: false });
+
+            $card[0].addEventListener('touchend', function () { onEnd(); }, { passive: true });
         }
 
         // ── Render card ──────────────────────────────────────────────────
@@ -775,18 +1166,9 @@
                     .catch(() => showToast('Could not delete card.'));
             });
 
-            $('#board').append($card);
+            $('#canvas').append($card);
 
-            $card.draggable({
-                containment: '#board', stack: '.paper', cursor: 'grabbing',
-                cancel: '.paper-title, .paper-content, .delete-btn',
-                stop: function (e, ui) {
-                    cardData.x = ui.position.left; cardData.y = ui.position.top;
-                    saveLocal();
-                    updateDoc(cardRef(proj.shareCode, cardData.id), { x: cardData.x, y: cardData.y });
-                }
-            });
-            enableTouchDrag($card, cardData);
+            enableDrag($card, cardData);
 
             if (isNew) {
                 $card.css({ opacity: 0 });
@@ -802,13 +1184,20 @@
             saveLocal(); renderSidebar(); startListening();
         }
 
-        function deleteProject(id) {
+        async function deleteProject(id) {
             if (appState.projects.length === 1) { showToast("Can't delete the last project!"); return; }
+            const proj = appState.projects.find(p => p.id === id);
             appState.projects = appState.projects.filter(p => p.id !== id);
             if (appState.activeProjectId === id) appState.activeProjectId = appState.projects[0].id;
-            const proj = activeProject();
-            $('#currentProjectName').text(proj ? proj.name : '—');
-            saveLocal(); renderSidebar(); startListening();
+            const active = activeProject();
+            $('#currentProjectName').text(active ? active.name : '—');
+            saveLocal();
+            // Remove from user's project list in Firestore
+            const uid = auth.currentUser?.uid;
+            if (uid && proj) {
+                try { await deleteDoc(userProjRef(uid, proj.shareCode)); } catch (e) { }
+            }
+            renderSidebar(); startListening();
             showToast('Project deleted');
         }
 
@@ -826,7 +1215,7 @@
             if (!name) { $('#modalInput').focus(); return; }
             const proj = makeProject(name);
             appState.projects.push(proj);
-            appState.activeProjectId = proj.id;
+            appState.activeProjectId = proj.shareCode;
             saveLocal();
             await syncProj(proj);
             $('#currentProjectName').text(proj.name);
@@ -868,7 +1257,39 @@
         $('#modalInput').on('keydown', e => { if (e.key === 'Enter') confirmNewProject(); if (e.key === 'Escape') closeModal(); });
         $('#modalOverlay').on('click', function (e) { if ($(e.target).is('#modalOverlay')) closeModal(); });
 
-        // ── Share modal ───────────────────────────────────────────────────
+        // ── Mobile menu ───────────────────────────────────────────────────
+        $('#mobileMenuBtn').on('click', function (e) {
+            e.stopPropagation();
+            $('#mobileMenu').toggleClass('open');
+        });
+        // Close when tapping outside
+        $(document).on('click touchstart', function (e) {
+            if (!$(e.target).closest('#mobileMenu, #mobileMenuBtn').length) {
+                $('#mobileMenu').removeClass('open');
+            }
+        });
+        function closeMobileMenu() { $('#mobileMenu').removeClass('open'); }
+
+        $('#mmAddCard').on('click', () => { closeMobileMenu(); addCard(); });
+        $('#mmNewProject').on('click', () => { closeMobileMenu(); openModal(); });
+        $('#mmShare').on('click', () => { closeMobileMenu(); openShare(); });
+        $('#mmJoin').on('click', () => { closeMobileMenu(); openJoin(); });
+        $('#mmHome').on('click', () => { closeMobileMenu(); resetView(); });
+        $('#mmLogout').on('click', async () => {
+            closeMobileMenu();
+            if (unsubscribeCards) { unsubscribeCards(); unsubscribeCards = null; }
+            if (unsubscribeProjects) { unsubscribeProjects(); unsubscribeProjects = null; }
+            await signOut(auth);
+        });
+
+        // Sync color swatches in mobile menu with rest of app
+        $('#mobileMenu').on('click touchend', '.color-swatch', function (e) {
+            e.preventDefault();
+            const color = $(this).data('color');
+            $('.color-swatch').removeClass('active');
+            $(`.color-swatch[data-color="${color}"]`).addClass('active');
+            selectedColor = color;
+        });
         $('#shareCloseBtn').on('click', () => $('#shareOverlay').removeClass('show'));
         $('#shareCopyBtn').on('click', async function () {
             const url = $('#shareLinkInput').val();
@@ -889,33 +1310,277 @@
         $('#joinCodeInput').on('keydown', e => { if (e.key === 'Enter') doJoin(); if (e.key === 'Escape') closeJoin(); });
         $('#joinModal').on('click', function (e) { if ($(e.target).is('#joinModal')) closeJoin(); });
 
-        // ── Bootstrap ────────────────────────────────────────────────────
-        function initNormal() {
-            const saved = loadLocal();
-            if (saved && saved.projects && saved.projects.length > 0) {
-                appState = saved;
-                appState.projects.forEach(p => p.cards = []);
+        // ── Auth UI ───────────────────────────────────────────────────────
+        let authMode = 'login';
+
+        $('.auth-tab').on('click', function () {
+            authMode = $(this).data('tab');
+            $('.auth-tab').removeClass('active');
+            $(this).addClass('active');
+            $('#authError').text('');
+            if (authMode === 'register') {
+                $('#authDisplayNameField').show();
+                $('#forgotWrap').hide();
+                $('#authSubmit').text('Create Account');
             } else {
-                const p = makeProject('My First Board');
-                appState.projects.push(p);
-                appState.activeProjectId = p.id;
-                saveLocal();
+                $('#authDisplayNameField').hide();
+                $('#forgotWrap').show();
+                $('#authSubmit').text('Sign In');
             }
-            const proj = activeProject();
-            $('#currentProjectName').text(proj ? proj.name : '—');
-            renderSidebar();
-            startListening();
+        });
+
+        $('#forgotLink').on('click', async function (e) {
+            e.preventDefault();
+            const email = $('#authUsername').val().trim();
+            if (!email || !email.includes('@')) { $('#authError').text('Enter your email above first.'); return; }
+            try {
+                await sendPasswordResetEmail(auth, email);
+                $('#authError').css('color', '#2ecc71').text('Reset link sent! Check your inbox.');
+                setTimeout(() => $('#authError').css('color', '#e74c3c').text(''), 4000);
+            } catch (e) {
+                $('#authError').text('Could not send reset email. Check the address.');
+            }
+        });
+
+        $('#authSubmit').on('click', handleAuth);
+        $('#authPassword, #authUsername, #authDisplayName').on('keydown', e => { if (e.key === 'Enter') handleAuth(); });
+
+        async function handleAuth() {
+            const email = $('#authUsername').val().trim();
+            const password = $('#authPassword').val();
+            const displayName = $('#authDisplayName').val().trim() || email.split('@')[0];
+            $('#authError').text('');
+
+            if (!email || !email.includes('@')) { $('#authError').text('Enter a valid email address.'); return; }
+            if (!password || password.length < 6) { $('#authError').text('Password must be at least 6 characters.'); return; }
+
+            $('#authSubmit').text('…').prop('disabled', true);
+
+            try {
+                if (authMode === 'register') {
+                    const cred = await createUserWithEmailAndPassword(auth, email, password);
+                    await updateProfile(cred.user, { displayName });
+                } else {
+                    await signInWithEmailAndPassword(auth, email, password);
+                }
+            } catch (e) {
+                $('#authSubmit').text(authMode === 'register' ? 'Create Account' : 'Sign In').prop('disabled', false);
+                const msgs = {
+                    'auth/email-already-in-use': 'An account with this email already exists.',
+                    'auth/user-not-found': 'No account found with this email.',
+                    'auth/wrong-password': 'Wrong password.',
+                    'auth/invalid-credential': 'Wrong email or password.',
+                    'auth/invalid-email': 'Invalid email address.',
+                    'auth/too-many-requests': 'Too many attempts. Try again later.',
+                    'auth/weak-password': 'Password must be at least 6 characters.',
+                };
+                $('#authError').text(msgs[e.code] || 'Something went wrong. Try again.');
+            }
         }
 
-        const urlParams = new URLSearchParams(location.search);
-        const joinCode = urlParams.get('join');
+        $('#logoutBtn').on('click', async () => {
+            if (unsubscribeCards) { unsubscribeCards(); unsubscribeCards = null; }
+            if (unsubscribeProjects) { unsubscribeProjects(); unsubscribeProjects = null; }
+            await signOut(auth);
+        });
 
-        if (joinCode) {
-            initNormal();
-            openJoin(joinCode.toUpperCase());
-        } else {
-            initNormal();
+        // ── Real-time project list listener ───────────────────────────────
+        let unsubscribeProjects = null;
+
+        function startProjectsListener(uid) {
+            if (unsubscribeProjects) { unsubscribeProjects(); unsubscribeProjects = null; }
+
+            unsubscribeProjects = onSnapshot(userProjsRef(uid), snapshot => {
+                snapshot.docChanges().forEach(change => {
+                    const data = { ...change.doc.data(), cards: [] };
+                    if (!data.id) data.id = data.shareCode;
+
+                    if (change.type === 'added') {
+                        if (!appState.projects.find(p => p.shareCode === data.shareCode)) {
+                            appState.projects.push(data);
+                            renderSidebar();
+                            showToast(`Project "${data.name}" added`);
+                        }
+                    }
+                    if (change.type === 'removed') {
+                        const wasActive = appState.activeProjectId === data.shareCode;
+                        appState.projects = appState.projects.filter(p => p.shareCode !== data.shareCode);
+                        if (wasActive && appState.projects.length > 0) {
+                            appState.activeProjectId = appState.projects[0].shareCode;
+                            const proj = activeProject();
+                            $('#currentProjectName').text(proj ? proj.name : '—');
+                            startListening();
+                        }
+                        renderSidebar();
+                        showToast(`Project "${data.name}" removed`);
+                    }
+                });
+            });
         }
+
+        // ── Auth state observer — drives entire app ───────────────────────
+        onAuthStateChanged(auth, async user => {
+            if (user) {
+                const displayName = user.displayName || user.email.split('@')[0];
+                $('#userNameLabel').text('👤 ' + displayName);
+                $('#mobileUserLabel').text(displayName);
+                $('#authScreen').hide();
+
+                // Load initial projects then start real-time listener
+                try {
+                    const snap = await getDocs(userProjsRef(user.uid));
+                    const projects = [];
+                    snap.forEach(d => {
+                        const data = { ...d.data(), cards: [] };
+                        if (!data.id) data.id = data.shareCode;
+                        projects.push(data);
+                    });
+
+                    if (projects.length === 0) {
+                        const p = makeProject('My First Board');
+                        projects.push(p);
+                        await syncProj(p);
+                    }
+
+                    appState = { activeProjectId: projects[0].shareCode, isGuest: false, projects };
+                    const proj = activeProject();
+                    $('#currentProjectName').text(proj ? proj.name : '—');
+                    renderSidebar();
+                    startListening();
+                    startProjectsListener(user.uid);
+                } catch (e) {
+                    console.error('Failed to load projects:', e);
+                    showToast('Failed to load projects.');
+                }
+
+                const urlParams = new URLSearchParams(location.search);
+                const joinCode = urlParams.get('join');
+                if (joinCode) openJoin(joinCode.toUpperCase());
+
+            } else {
+                $('#authScreen').show();
+                $('#authSubmit').text('Sign In').prop('disabled', false);
+                if (unsubscribeProjects) { unsubscribeProjects(); unsubscribeProjects = null; }
+                appState = { activeProjectId: null, isGuest: false, projects: [] };
+                $('#canvas').find('.paper').remove();
+                $('#currentProjectName').text('—');
+                renderSidebar();
+            }
+        });
+
+        // ══════════════════════════════════════════════════════════════════
+        // PAN & ZOOM ENGINE
+        // ══════════════════════════════════════════════════════════════════
+        const $canvas = $('#canvas');
+        const $board = $('#board');
+        const MIN_ZOOM = 0.25;
+        const MAX_ZOOM = 3;
+        const ZOOM_STEP = 0.15;
+
+        let vp = { x: 0, y: 0, z: 1 };
+
+        function applyTransform(animate) {
+            const t = `translate(${vp.x}px, ${vp.y}px) scale(${vp.z})`;
+            if (animate) {
+                $canvas.css({ transition: 'transform 0.18s ease', transform: t });
+                setTimeout(() => $canvas.css('transition', ''), 200);
+            } else {
+                $canvas.css({ transition: 'none', transform: t });
+            }
+        }
+
+        function clampZoom(z) { return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z)); }
+
+        function zoomAt(cx, cy, delta) {
+            const newZ = clampZoom(vp.z + delta);
+            const scale = newZ / vp.z;
+            vp.x = cx - scale * (cx - vp.x);
+            vp.y = cy - scale * (cy - vp.y);
+            vp.z = newZ;
+            applyTransform(false);
+        }
+
+        // ── Mouse wheel zoom ─────────────────────────────────────────────
+        $board[0].addEventListener('wheel', function (e) {
+            e.preventDefault();
+            const rect = $board[0].getBoundingClientRect();
+            zoomAt(e.clientX - rect.left, e.clientY - rect.top, e.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP);
+        }, { passive: false });
+
+        // ── Drag to pan (empty board space only) ─────────────────────────
+        let panState = null;
+
+        $board.on('mousedown', function (e) {
+            if (e.button !== 0 && e.button !== 1) return;
+            if ($(e.target).closest('.paper').length) return;
+            e.preventDefault();
+            panState = { startX: e.clientX, startY: e.clientY, ox: vp.x, oy: vp.y };
+            $board.addClass('panning');
+        });
+
+        $(document).on('mousemove', function (e) {
+            if (!panState) return;
+            vp.x = panState.ox + (e.clientX - panState.startX);
+            vp.y = panState.oy + (e.clientY - panState.startY);
+            applyTransform(false);
+        }).on('mouseup', function () {
+            if (panState) { panState = null; $board.removeClass('panning'); }
+        });
+
+        // ── Keyboard shortcuts ───────────────────────────────────────────
+        $(document).on('keydown', function (e) {
+            if ($(e.target).is('input, textarea')) return;
+            if (e.key === '+' || e.key === '=') { const r = $board[0].getBoundingClientRect(); zoomAt(r.width / 2, r.height / 2, ZOOM_STEP); }
+            if (e.key === '-') { const r = $board[0].getBoundingClientRect(); zoomAt(r.width / 2, r.height / 2, -ZOOM_STEP); }
+            if (e.key === '0') { resetView(); }
+        });
+
+        function resetView() { vp = { x: 0, y: 0, z: 1 }; applyTransform(true); }
+
+        $('#homeBtn, #bbHome').on('click', resetView);
+
+        // ── Touch: pinch-to-zoom + single-finger pan on empty space ──────
+        let touchPinch = null;
+
+        $board[0].addEventListener('touchstart', function (e) {
+            const ts = e.touches;
+            if (ts.length === 2) {
+                e.preventDefault();
+                touchPinch = {
+                    dist: Math.hypot(ts[0].clientX - ts[1].clientX, ts[0].clientY - ts[1].clientY),
+                    cx: (ts[0].clientX + ts[1].clientX) / 2,
+                    cy: (ts[0].clientY + ts[1].clientY) / 2 - $board[0].getBoundingClientRect().top,
+                    oz: vp.z
+                };
+            } else if (ts.length === 1 && !$(e.target).closest('.paper').length) {
+                panState = { startX: ts[0].clientX, startY: ts[0].clientY, ox: vp.x, oy: vp.y };
+            }
+        }, { passive: false });
+
+        $board[0].addEventListener('touchmove', function (e) {
+            const ts = e.touches;
+            if (ts.length === 2 && touchPinch) {
+                e.preventDefault();
+                const dist = Math.hypot(ts[0].clientX - ts[1].clientX, ts[0].clientY - ts[1].clientY);
+                const newZ = clampZoom(touchPinch.oz * (dist / touchPinch.dist));
+                const scale = newZ / vp.z;
+                vp.x = touchPinch.cx - scale * (touchPinch.cx - vp.x);
+                vp.y = touchPinch.cy - scale * (touchPinch.cy - vp.y);
+                vp.z = newZ;
+                applyTransform(false);
+            } else if (ts.length === 1 && panState) {
+                e.preventDefault();
+                vp.x = panState.ox + (ts[0].clientX - panState.startX);
+                vp.y = panState.oy + (ts[0].clientY - panState.startY);
+                applyTransform(false);
+            }
+        }, { passive: false });
+
+        $board[0].addEventListener('touchend', function () {
+            touchPinch = null; panState = null;
+        });
+
+        applyTransform(false);
 
     </script>
 </body>
